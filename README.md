@@ -72,31 +72,27 @@ cd /workspaces/Gaius-Client
 bash network/configure-paper.sh
 ```
 
-This sets Paper to listen on **127.0.0.1:25566**. Do not make port 25566 public or forward it in Codespaces.
+This now configures **both** server files in one go: Paper listens privately on **127.0.0.1:25566**, while Velocity listens on **0.0.0.0:25565** and routes to Paper at **127.0.0.1:25566**. Stop both servers before running the script. Do not make Paper port 25566 public.
 
 ## 5. Configure and start Velocity
 
-Open the Velocity config:
+The configuration script updates the Velocity bind and Paper backend address automatically. You can inspect the result here:
 
 ```bash
 nano network/runtime/velocity/velocity.toml
 ```
 
-Make sure its public bind is:
+Expected values:
 
 ```toml
 bind = "0.0.0.0:25565"
-```
 
-In the `[servers]` section, set the backend entry and default target to Paper:
-
-```toml
 [servers]
 lobby = "127.0.0.1:25566"
 try = ["lobby"]
 ```
 
-Keep any other existing settings in the file. Velocity modern forwarding and Paper's matching forwarding secret/configuration must also be set before treating the network as ready for player connections; do not expose the Paper backend directly.
+Keep any other existing settings. Velocity modern forwarding and Paper's matching forwarding secret/configuration must also be set before treating the network as ready for player connections; do not expose the Paper backend directly.
 
 ## 6. Run both servers
 
