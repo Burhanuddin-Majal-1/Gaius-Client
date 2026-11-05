@@ -110,9 +110,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # JARs are intentionally ignored globally, so force-add these two runtime files.
-          git add -f network/runtime/paper/paper.jar network/runtime/velocity/velocity.jar
-          git add network/runtime/versions.json
+          # The entire network/runtime directory is ignored, so force-add all three generated files.
+          git add -f network/runtime/paper/paper.jar network/runtime/velocity/velocity.jar network/runtime/versions.json
 
           if git diff --cached --quiet; then
             echo "No changes detected; repository already has these exact files."
