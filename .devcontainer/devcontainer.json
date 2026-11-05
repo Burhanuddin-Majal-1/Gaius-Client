@@ -1,0 +1,29 @@
+{
+  "name": "MB Software House — Java 25 Network",
+  "image": "mcr.microsoft.com/devcontainers/java:25-bookworm",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y --no-install-recommends curl jq python3 && java -version",
+  "forwardPorts": [25565, 8080, 8081],
+  "portsAttributes": {
+    "25565": {
+      "label": "Velocity — Minecraft",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Gaius WebSocket Bridge",
+      "onAutoForward": "notify"
+    },
+    "8081": {
+      "label": "Gaius Website",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "streetsidesoftware.code-spell-checker"
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}
