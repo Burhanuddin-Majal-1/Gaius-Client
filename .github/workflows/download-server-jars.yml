@@ -1,0 +1,123 @@
+name: Download Paper + Velocity JARs
+
+on:
+  workflow_dispatch:
+    inputs:
+      minecraft_version:
+        description: "Minecraft version for Paper"
+        required: true
+        default: "26.3"
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: download-server-jars
+  cancel-in-progress: false
+
+jobs:
+  download:
+    name: Download and commit server JARs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download and verify Paper + Velocity
+        shell: bash
+        env:
+          MC_VERSION: ${{ inputs.minecraft_version }}
+          PAPERMC_USER_AGENT: "MB-Software-House/1.0 (https://github.com/Burhanuddin-Majal-1/Gaius-Client)"
+        run: |
+          set -Eeuo pipefail
+
+          command -v jq >/dev/null
+          command -v sha256sum >/dev/null
+
+          API="https://fill.papermc.io/v3"
+          mkdir -p network/runtime/paper network/runtime/velocity
+
+          echo "Finding the latest stable Paper build for Minecraft ${MC_VERSION}..."
+          PAPER_BUILDS="$(curl --fail --silent --show-error \
+            --retry 3 --retry-delay 2 \
+            --header "User-Agent: ${PAPERMC_USER_AGENT}" \
+            "${API}/projects/paper/versions/${MC_VERSION}/builds")"
+
+          PAPER_META="$(printf '%s' "${PAPER_BUILDS}" | jq -cer \
+            '[.[] | select(.channel == "STABLE")][0]')"
+          PAPER_BUILD="$(printf '%s' "${PAPER_META}" | jq -er '.id')"
+          PAPER_URL="$(printf '%s' "${PAPER_META}" | jq -er '.downloads["server:default"].url')"
+          PAPER_SHA="$(printf '%s' "${PAPER_META}" | jq -er '.downloads["server:default"].checksums.sha256')"
+
+          echo "Downloading Paper build ${PAPER_BUILD}..."
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-delay 2 \
+            --output network/runtime/paper/paper.jar "${PAPER_URL}"
+          printf '%s  %s\n' "${PAPER_SHA}" network/runtime/paper/paper.jar | sha256sum --check
+
+          echo "Finding the latest stable Velocity build..."
+          VELOCITY_PROJECT="$(curl --fail --silent --show-error \
+            --retry 3 --retry-delay 2 \
+            --header "User-Agent: ${PAPERMC_USER_AGENT}" \
+            "${API}/projects/velocity")"
+          VELOCITY_VERSION="$(printf '%s' "${VELOCITY_PROJECT}" | jq -er \
+            '[.versions | to_entries[] | .value[]][0]')"
+
+          VELOCITY_BUILDS="$(curl --fail --silent --show-error \
+            --retry 3 --retry-delay 2 \
+            --header "User-Agent: ${PAPERMC_USER_AGENT}" \
+            "${API}/projects/velocity/versions/${VELOCITY_VERSION}/builds")"
+
+          VELOCITY_META="$(printf '%s' "${VELOCITY_BUILDS}" | jq -cer \
+            '([.[] | select(.channel == "STABLE")][0] // [ .[] | select(.channel == "RECOMMENDED") ][0] // .[0])')"
+          VELOCITY_BUILD="$(printf '%s' "${VELOCITY_META}" | jq -er '.id')"
+          VELOCITY_CHANNEL="$(printf '%s' "${VELOCITY_META}" | jq -er '.channel')"
+          VELOCITY_URL="$(printf '%s' "${VELOCITY_META}" | jq -er '.downloads["server:default"].url')"
+          VELOCITY_SHA="$(printf '%s' "${VELOCITY_META}" | jq -er '.downloads["server:default"].checksums.sha256')"
+
+          echo "Downloading Velocity ${VELOCITY_VERSION} build ${VELOCITY_BUILD} (${VELOCITY_CHANNEL})..."
+          curl --fail --location --silent --show-error \
+            --retry 3 --retry-delay 2 \
+            --output network/runtime/velocity/velocity.jar "${VELOCITY_URL}"
+          printf '%s  %s\n' "${VELOCITY_SHA}" network/runtime/velocity/velocity.jar | sha256sum --check
+
+          cat > network/runtime/versions.json <<EOF
+          {
+            "minecraft_version": "${MC_VERSION}",
+            "paper": {
+              "build": ${PAPER_BUILD},
+              "channel": "STABLE",
+              "sha256": "${PAPER_SHA}"
+            },
+            "velocity": {
+              "version": "${VELOCITY_VERSION}",
+              "build": ${VELOCITY_BUILD},
+              "channel": "${VELOCITY_CHANNEL}",
+              "sha256": "${VELOCITY_SHA}"
+            }
+          }
+          EOF
+
+          echo "Both JARs downloaded and SHA-256 verified."
+
+      - name: Commit JARs to the repository
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # JARs are intentionally ignored globally, so force-add these two runtime files.
+          git add -f network/runtime/paper/paper.jar network/runtime/velocity/velocity.jar
+          git add network/runtime/versions.json
+
+          if git diff --cached --quiet; then
+            echo "No changes detected; repository already has these exact files."
+            exit 0
+          fi
+
+          git commit -m "Update Paper and Velocity server JARs"
+          git push
