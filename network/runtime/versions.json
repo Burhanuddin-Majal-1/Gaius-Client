@@ -1,0 +1,14 @@
+{
+  "minecraft_version": "26.3",
+  "paper": {
+    "build": 242,
+    "channel": "STABLE",
+    "sha256": "fc704a4510a2744bab90a6770336b202038e60333e37f24af8027ee948935d20"
+  },
+  "velocity": {
+    "version": "4.3.2-SNAPSHOT",
+    "build": 48,
+    "channel": "BETA",
+    "sha256": "01e37982e92f78465c950ef6b5ebe9fd4f94f11a11868c95682b2ee99f7409bb"
+  }
+}
