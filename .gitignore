@@ -2,6 +2,7 @@
 # They must never be committed.
 port/work/
 work/
+network/runtime/
 *.jar
 *.wasm
 *.ogg
