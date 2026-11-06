@@ -9,6 +9,9 @@ network/runtime/
 terms-accepted.json
 fetch-manifest.json
 
+# Local Gaius Runner settings are created on first launch and must not be committed.
+/port/runner.env
+
 __pycache__/
 *.pyc
 
