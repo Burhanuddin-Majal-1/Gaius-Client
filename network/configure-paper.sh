@@ -6,8 +6,8 @@ set -Eeuo pipefail
 # Paper    = private backend     127.0.0.1:25566
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PAPER_DIR="$ROOT/runtime/paper"
-VELOCITY_DIR="$ROOT/runtime/velocity"
+PAPER_DIR="$ROOT/network/runtime/paper"
+VELOCITY_DIR="$ROOT/network/runtime/velocity"
 PROPERTIES="$PAPER_DIR/server.properties"
 PAPER_GLOBAL="$PAPER_DIR/config/paper-global.yml"
 VELOCITY_CONFIG="$VELOCITY_DIR/velocity.toml"
