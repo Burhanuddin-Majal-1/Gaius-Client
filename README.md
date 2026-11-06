@@ -20,6 +20,34 @@ Default settings target Minecraft **26.3** and use a **10 GB TeaVM heap**. A 4-c
 
 This runner launches the browser website only. Multiplayer still uses the configured Gaius RelayNode and a reachable Java server; it does not start Paper, Velocity, or a RelayNode.
 
+## Git LFS (large files)
+
+Git LFS is configured for repository archives and large binary assets: `.zip`, `.7z`, `.tar`, `.tar.gz`, and `.bin`. These files are stored through Git LFS instead of normal Git blobs.
+
+Initialize Git LFS once in a Codespace before adding or pulling LFS-managed files:
+
+```bash
+git lfs version
+git lfs install
+git lfs pull
+```
+
+If `git lfs` is not installed in the Codespace, install it with:
+
+```bash
+sudo apt-get update && sudo apt-get install -y git-lfs && git lfs install
+```
+
+To add a new large file, put it in the repository, then stage and commit it normally:
+
+```bash
+git add path/to/large-file.zip
+git commit -m "Add large asset"
+git push
+```
+
+Check which files are managed by LFS with `git lfs ls-files`. Git LFS does **not** override `.gitignore`: JARs, WASM builds, and generated files under `port/work/` and `network/runtime/` remain excluded intentionally. Do not add official Minecraft game files or generated client builds to the repository.
+
 ## 1. Create the Codespace
 
 1. Open this repository on GitHub.
