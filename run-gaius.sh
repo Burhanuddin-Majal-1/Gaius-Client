@@ -57,7 +57,8 @@ if [[ "$BUILD" == "1" ]]; then
 
   echo "[3/3] Compiling the Gaius browser client and release site..."
   echo "Note: 16 GB Codespaces may still run out of memory during TeaVM compilation."
-  GAIUS_TEAVM_MAX_HEAP="$HEAP" bash "$ROOT/port/scripts/build-version-release.sh" "$PROFILE"
+  export MAVEN_OPTS="${MAVEN_OPTS:--Xms1g -Xmx${HEAP} -XX:+UseG1GC -XX:MaxGCPauseMillis=500}"
+  bash "$ROOT/port/scripts/build-version-release.sh" "$PROFILE"
 else
   echo "Build-on-start is disabled; reusing the existing build."
 fi
