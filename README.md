@@ -4,6 +4,22 @@ Private test setup using **Velocity + Paper 26.3** in GitHub Codespaces, with th
 
 > This repository is a development setup, not a permanent public server host. Codespaces can stop when idle, and forwarded addresses can change.
 
+## Gaius Client Runner (compile + launch)
+
+The repository includes a one-command runner for the Minecraft 26.3 browser client. In the Codespace terminal, run:
+
+```bash
+cd /workspaces/Gaius-Client && git pull && chmod +x run-gaius.sh && ./run-gaius.sh
+```
+
+On first run it creates `port/runner.env` from `port/runner.env.example`. That local file remembers the selected Minecraft profile, website port, bind address, build-on-start setting, and TeaVM heap for future runs. It is ignored by Git and is not committed.
+
+The runner fetches and verifies the official game files, prepares the client, compiles the browser release, then serves the generated site on port **8081**. Open the forwarded **8081** port from the Codespaces Ports tab. Stop the website with **Ctrl+C**.
+
+Default settings target Minecraft **26.3** and use a **10 GB TeaVM heap**. A 4-core/16-GB Codespace may still run out of memory: the project recommends at least 32 GB physical memory for a full build. If compilation fails from memory pressure, lower `GAIUS_TEAVM_MAX_HEAP` in `port/runner.env` (for example, `8g`) and retry. After a successful build, set `GAIUS_BUILD_ON_START="0"` in that file to launch the existing build without compiling again.
+
+This runner launches the browser website only. Multiplayer still uses the configured Gaius RelayNode and a reachable Java server; it does not start Paper, Velocity, or a RelayNode.
+
 ## 1. Create the Codespace
 
 1. Open this repository on GitHub.
