@@ -61,7 +61,7 @@ nano eula.txt
 
 Change `eula=false` to `eula=true`, save with **Ctrl+O**, press **Enter**, then exit with **Ctrl+X**.
 
-Start Paper again so it creates `server.properties`. Once it finishes starting, stop it with **Ctrl+C**.
+Start Paper again so it creates `server.properties` and `config/paper-global.yml`. Once it finishes starting, stop it with **Ctrl+C**. Then start Velocity once from `network/runtime/velocity` so it creates `velocity.toml`, and stop it with **Ctrl+C**.
 
 ## 4. Set Paper to the private backend port
 
@@ -72,7 +72,7 @@ cd /workspaces/Gaius-Client
 bash network/configure-paper.sh
 ```
 
-This now configures **both** server files in one go: Paper listens privately on **127.0.0.1:25566**, while Velocity listens on **0.0.0.0:25565** and routes to Paper at **127.0.0.1:25566**. Stop both servers before running the script. Do not make Paper port 25566 public.
+This configures both ports and **Velocity modern forwarding**. It creates a private random `forwarding.secret`, configures Velocity to authenticate players and forward their identity, and configures Paper to verify that same secret. Paper listens privately on **127.0.0.1:25566**; Velocity listens on **0.0.0.0:25565**. Stop both servers before running the script. Do not make Paper port 25566 public, and never share `network/runtime/velocity/forwarding.secret`.
 
 ## 5. Configure and start Velocity
 
@@ -82,7 +82,7 @@ The configuration script updates the Velocity bind and Paper backend address aut
 nano network/runtime/velocity/velocity.toml
 ```
 
-Expected values:
+Expected important values:
 
 ```toml
 bind = "0.0.0.0:25565"
@@ -92,7 +92,7 @@ lobby = "127.0.0.1:25566"
 try = ["lobby"]
 ```
 
-Keep any other existing settings. Velocity modern forwarding and Paper's matching forwarding secret/configuration must also be set before treating the network as ready for player connections; do not expose the Paper backend directly.
+Keep any other existing settings. The script also sets Paper's `proxies.velocity.enabled: true`, matching `online-mode: true` and the same secret, plus `online-mode=false` in Paper's `server.properties`. The backend stays bound to localhost and verifies Velocity's forwarding signature. Do not expose Paper directly.
 
 ## 6. Run both servers
 
