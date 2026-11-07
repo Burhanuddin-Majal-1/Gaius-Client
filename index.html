@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101522">
+  <meta name="robots" content="noindex">
+  <title>Gaius Client</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; background: #101522; color: #f4f7ff; }
+    * { box-sizing: border-box; }
+    body { min-height: 100vh; margin: 0; display: grid; place-items: center; padding: 24px; }
+    main { width: min(100%, 560px); padding: 32px; border: 1px solid #34415b; border-radius: 20px; background: #182235; box-shadow: 0 20px 70px #0006; }
+    h1 { margin: 0 0 12px; font-size: clamp(2rem, 8vw, 3rem); }
+    p { color: #c5cee0; line-height: 1.6; }
+    a { display: inline-block; margin-top: 12px; padding: 12px 18px; border-radius: 10px; background: #8bb8ff; color: #101522; font-weight: 700; text-decoration: none; }
+    small { display: block; margin-top: 20px; color: #9eabc2; }
+  </style>
+  <script>
+    // The Pages release matrix publishes each profile under its version path.
+    // Keep this relative so project Pages sites work under /<repository>/.
+    window.location.replace(new URL("./26.3/", window.location.href));
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Gaius Client</h1>
+    <p>Opening the Minecraft 26.3 browser client…</p>
+    <a href="./26.3/">Open Gaius Client</a>
+    <small>If the client does not load, the Pages deployment may not contain the generated <code>26.3/</code> release directory yet.</small>
+  </main>
+</body>
+</html>
