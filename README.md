@@ -18,6 +18,92 @@ The runner fetches and verifies the official game files, prepares the client, co
 
 Default settings target Minecraft **26.3** and use a **10 GB TeaVM heap**. A 4-core/16-GB Codespace may still run out of memory: the project recommends at least 32 GB physical memory for a full build. If compilation fails from memory pressure, lower `GAIUS_TEAVM_MAX_HEAP` in `port/runner.env` (for example, `8g`) and retry. After a successful build, set `GAIUS_BUILD_ON_START="0"` in that file to launch the existing build without compiling again.
 
+### Check build prerequisites before compiling
+
+The Gaius runner needs **Java 25+, Node.js 22+, npm, Git LFS, curl, jq, unzip, and Python 3**. If the runner prints a message such as `Missing required command: node`, `git: 'lfs' is not a git command`, or a Java version error, fix the missing prerequisite first.
+
+Run this diagnostic command from the repository root:
+
+```bash
+cd /workspaces/Gaius-Client && \
+echo "=== Required build tools ===" && \
+for tool in java node npm git-lfs curl jq unzip python3; do \
+  if command -v "$tool" >/dev/null 2>&1; then \
+    printf 'OK      %s: ' "$tool"; \
+    case "$tool" in \
+      java) java -version 2>&1 | head -n 1 ;; \
+      node) node --version ;; \
+      npm) npm --version ;; \
+      git-lfs) git lfs version ;; \
+      curl) curl --version | head -n 1 ;; \
+      jq) jq --version ;; \
+      unzip) unzip -v | head -n 1 ;; \
+      python3) python3 --version ;; \
+    esac; \
+  else \
+    echo "MISSING $tool"; \
+  fi; \
+done && \
+echo "=== Java / Node minimum versions ===" && \
+java -version 2>&1 | grep -qE 'version "25([.]|")' && echo "Java 25+: OK" || echo "Java 25+: FIX REQUIRED" && \
+node -e 'const v=Number(process.versions.node.split(".")[0]); if(v>=22) console.log("Node 22+: OK"); else {console.log("Node 22+: FIX REQUIRED"); process.exitCode=1}'
+```
+
+### Fix missing tools
+
+**Missing Node.js or npm**
+
+Install Node.js 22 and npm:
+
+```bash
+sudo apt-get update && \
+sudo apt-get install -y curl ca-certificates && \
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && \
+sudo apt-get install -y nodejs
+```
+
+**Missing Git LFS**
+
+```bash
+sudo apt-get update && \
+sudo apt-get install -y git-lfs && \
+git lfs install --force
+```
+
+If this repository uses LFS-managed files, retrieve them with:
+
+```bash
+git lfs pull
+```
+
+**Missing Java, or Java is below version 25**
+
+This repository's devcontainer is configured for Java 25. In VS Code, open the Command Palette with **Ctrl+Shift+P**, choose **Codespaces: Rebuild Container**, and wait for the rebuild to finish. Then verify:
+
+```bash
+java -version
+```
+
+The first version number must be **25 or higher**. Do not continue with an older Java version.
+
+**Missing curl, jq, unzip, or Python 3**
+
+```bash
+sudo apt-get update && \
+sudo apt-get install -y curl jq unzip python3
+```
+
+### Compile TeaVM and launch Gaius
+
+After the prerequisite check passes, run this from the repository root:
+
+```bash
+cd /workspaces/Gaius-Client && \
+GAIUS_BUILD_ON_START=1 ./run-gaius.sh
+```
+
+The runner verifies existing downloaded files before downloading them again, so keep `port/work/` if a previous download or build stopped. Do not delete that folder just to retry. If the command fails, copy the complete error and the final terminal output when asking for help.
+
 This runner launches the browser website only. Multiplayer still uses the configured Gaius RelayNode and a reachable Java server; it does not start Paper, Velocity, or a RelayNode.
 
 ## Git LFS (large files)
